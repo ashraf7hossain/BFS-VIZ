@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<canvas id="can"></canvas>
+<script>
+	var can = document.getElementById("can");
+	var ctx = can.getContext("2d");
+
+	var w = window.innerWidth, h = window.innerHeight;
+
+	can.width = w, can.height = h;
+	can.style.backgroundColor = "#111";
+
+	function drawT(val , x , y , col = "crimson"){
+		ctx.beginPath();
+		ctx.fillStyle = col;
+		ctx.arc(x , y , 20 , 0 , 2 * Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.font = "500 20px Arial";
+		ctx.fillStyle = "white";
+		ctx.textAlign = "center";
+		ctx.fillText(val  , x , y + 10);
+	}
+	// drawT(23 , w / 2 , h / 2);
+	function drawL(a , b , x , y){
+		ctx.beginPath();
+		ctx.moveTo(a , b);
+		ctx.lineTo(x , y);
+		ctx.strokeStyle = "white";
+		ctx.stroke();
+		ctx.closePath();
+	}
+	function rand(left , right){
+		return Math.floor(Math.random()*right + left);
+	}
+	function sleep(ms){
+		return new Promise((resolve)=>setTimeout(resolve,ms));
+	}
+
+	var n = 20;
+	var adj = [];
+	for(let i = 0 ; i < n; ++i){
+		adj.push([]);
+	}
+	for(let i = 0  ; i < n + 5; ++i){
+		let u = rand(0 , n) , v = rand(0 , n);
+		adj[u].push(v);
+		adj[v].push(u);
+	}
+	var cord = [];
+	for(let i = 0 ; i < n ; ++i){
+		cord.push({
+			x : rand(w/2 - w/4 , w/2),
+			y : rand(h/2 - h/4 , h/2 + h/5)
+		})
+	}
+	for(let i = 0 ; i < n ; ++i){
+		for(let j of adj[i]){
+			drawL(cord[i].x , cord[i].y , cord[j].x , cord[j].y);
+			drawT(j , cord[j].x , cord[j].y);
+		}
+	}
+	var visit = new Array(n);
+	visit.fill(false);
+	
+	async function dfs(u , col = "green"){
+		visit[u] = true;
+		await sleep(200);
+		drawT(u , cord[u].x , cord[u].y, col);
+		await sleep(200);
+		for(let v of adj[u]){
+			if(!visit[v]) await dfs(v , col);
+		}
+	}
+    // dfs(0);
+    var cols = ["darkgreen" , "darkblue" , "orange" , "purple"];
+	async function doit(){
+	   var c = 0;
+
+		for(let i = 0 ; i < n; ++i){
+			if(!visit[i]){
+				await dfs(i , cols[c]);
+				c++;
+			}
+	   }
+	}
+	doit();
+</script>
+	
+</body>
+</html>
